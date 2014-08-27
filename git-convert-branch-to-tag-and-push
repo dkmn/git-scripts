@@ -29,11 +29,14 @@ echo tag created
 git branch -D $1
 echo branch deleted
 
-# iterate through all remotes and delete branch
-for remote in $(git remote); do git push $remote :$1; done
-echo remote branches deleted
+# don't exit on error
+set +e
 
-# iterate through all remotes and push tag (reference is now unique as the
-# branch is gone)
-for remote in $(git remote); do git push $remote $1; done
-echo new tags pushed remotely
+# iterate through all remotes and delete branch, then immediately push tag
+# as some repos might have the branch and others not
+for remote in $(git remote)
+do
+  git push $remote :$1
+  git push $remote $1
+done
+echo remote branches deleted and tags pushed
